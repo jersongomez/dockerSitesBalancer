@@ -157,11 +157,16 @@ runEnviroments(){
 			sudo -- sh -c "cat /etc/hosts_bk | sed 's/.*\t$principal/$ipcontainerSite\t$principal/g' > /etc/hosts"
 		fi
 
+		hostsSite="docker exec -it $containerId bash -c \"echo '$ipcontainerSite	$principal' >> /etc/hosts\""
+		eval $hostsSite
+
 		#agregamos los hosts de los nodos
 		cantNodes=$(cat $pathBalancer | jq ".[$COUNTER] .sites | length")
+		echo " cuantos nodes hay $cantNodes"
 		COUNTERNODE=0
-		while [ $COUNTERNODE -lt $cantBalancer ]; do
+		while [ $COUNTERNODE -lt $cantNodes ] ; do
 			let COUNTERNODE=COUNTERNODE+1
+			echo "pasoooo .[$COUNTER] .sites .nodo$COUNTERNODE" 
 			node=$(cat $pathBalancer | jq ".[$COUNTER] .sites .nodo$COUNTERNODE" | sed 's/"//g')
 			hostsSite="docker exec -it $containerId bash -c \"echo '$ipcontainerSite	$node' >> /etc/hosts\""
 			eval $hostsSite
