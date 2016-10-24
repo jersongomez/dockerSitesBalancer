@@ -72,10 +72,10 @@ ADD	./configuration/httpd-vhosts-hw.conf /etc/httpd/conf/httpd-vhosts-hw.conf
 ADD	./configuration/httpd-vhosts-webapps.conf /etc/httpd/conf/httpd-vhosts-webapps.conf 
 
 # INSTALACION DE IDIOMAS EN SO
-#RUN	localedef -v -c -i en_GB -f UTF-8 en_GB.UTF-8 
-#RUN	localedef -v -c -i es_CO -f UTF-8 es_CO.UTF-8
-#RUN	localedef -v -c -i fr_FR -f UTF-8 fr_FR.UTF-8
-#RUN	localedef -v -c -i pt_PT -f UTF-8 pt_PT.UTF-8 
+RUN	localedef -c -i en_GB -f UTF-8 en_GB.UTF-8 
+RUN	localedef -c -i es_CO -f UTF-8 es_CO.UTF-8
+RUN	localedef -c -i fr_FR -f UTF-8 fr_FR.UTF-8
+RUN	localedef -c -i pt_PT -f UTF-8 pt_PT.UTF-8 
 
 EXPOSE 80
 EXPOSE 443
