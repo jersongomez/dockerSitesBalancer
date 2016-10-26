@@ -12,6 +12,8 @@ RUN	yum install -y php54-php-bcmath php54 php54-php-cli php54-php-gd php54-php-l
 RUN	source /opt/rh/php54/enable
 RUN	rm -fr /etc/httpd/conf.d/php.conf 
 RUN	sed -i -- 's/\;date\.timezone\ =/date\.timezone\ = America\/Bogota/g' /opt/rh/php54/root/etc/php.ini
+RUN	sed -i -- 's/short_open_tag \= Off/short_open_tag \= On/g' /opt/rh/php54/root/etc/php.ini
+RUN	sed -i -- 's/\;error_log \= syslog/error_log \= \/var\/log\/httpd\/php_error/g' /opt/rh/php54/root/etc/php.ini
 
 # DIRECTORIO TEMPORALES Y LOGS
 RUN 	mkdir -p /var/www/files/web/file \
