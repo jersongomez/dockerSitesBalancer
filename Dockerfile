@@ -12,6 +12,8 @@ RUN	yum install -y php54-php-bcmath php54 php54-php-cli php54-php-gd php54-php-l
 RUN	source /opt/rh/php54/enable
 RUN	rm -fr /etc/httpd/conf.d/php.conf 
 RUN	sed -i -- 's/\;date\.timezone\ =/date\.timezone\ = America\/Bogota/g' /opt/rh/php54/root/etc/php.ini
+RUN	sed -i -- 's/short_open_tag \= Off/short_open_tag \= On/g' /opt/rh/php54/root/etc/php.ini
+RUN	sed -i -- 's/\;error_log \= syslog/error_log \= \/var\/log\/httpd\/php_error/g' /opt/rh/php54/root/etc/php.ini
 
 # DIRECTORIO TEMPORALES Y LOGS
 RUN 	mkdir -p /var/www/files/web/file \
@@ -72,10 +74,10 @@ ADD	./configuration/httpd-vhosts-hw.conf /etc/httpd/conf/httpd-vhosts-hw.conf
 ADD	./configuration/httpd-vhosts-webapps.conf /etc/httpd/conf/httpd-vhosts-webapps.conf 
 
 # INSTALACION DE IDIOMAS EN SO
-#RUN	localedef -v -c -i en_GB -f UTF-8 en_GB.UTF-8 
-#RUN	localedef -v -c -i es_CO -f UTF-8 es_CO.UTF-8
-#RUN	localedef -v -c -i fr_FR -f UTF-8 fr_FR.UTF-8
-#RUN	localedef -v -c -i pt_PT -f UTF-8 pt_PT.UTF-8 
+RUN	localedef -c -i en_GB -f UTF-8 en_GB.UTF-8 
+RUN	localedef -c -i es_CO -f UTF-8 es_CO.UTF-8
+RUN	localedef -c -i fr_FR -f UTF-8 fr_FR.UTF-8
+RUN	localedef -c -i pt_PT -f UTF-8 pt_PT.UTF-8 
 
 EXPOSE 80
 EXPOSE 443

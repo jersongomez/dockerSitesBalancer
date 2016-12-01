@@ -98,8 +98,13 @@ runEnviroments(){
 		else
 			RUTA_PNP="-v $RUTA_PNP:/var/www/html/pnpwebservice:rw"
 		fi
+		if [ ! -d $RUTA_MDM ] || [ -z $RUTA_MDM ] ; then
+			printWarning " \- RUTA_MDM ($RUTA_MDM) $msg"
+		else
+			RUTA_MDM="-v $RUTA_MDM:/var/www/html/mdmdecameron:rw"
+		fi
 
-                rutSecure="$RUTA_SECURE $RUTA_AMADEUS $RUTA_PNP"		
+                rutSecure="$RUTA_SECURE $RUTA_AMADEUS $RUTA_PNP $RUTA_MDM"		
     	fi
 	
 	if [ ! -z $ENVHODELINE ] && $ENVHODELINE; then                
@@ -162,11 +167,9 @@ runEnviroments(){
 
 		#agregamos los hosts de los nodos
 		cantNodes=$(cat $pathBalancer | jq ".[$COUNTER] .sites | length")
-		echo " cuantos nodes hay $cantNodes"
 		COUNTERNODE=0
 		while [ $COUNTERNODE -lt $cantNodes ] ; do
 			let COUNTERNODE=COUNTERNODE+1
-			echo "pasoooo .[$COUNTER] .sites .nodo$COUNTERNODE" 
 			node=$(cat $pathBalancer | jq ".[$COUNTER] .sites .nodo$COUNTERNODE" | sed 's/"//g')
 			hostsSite="docker exec -it $containerId bash -c \"echo '$ipcontainerSite	$node' >> /etc/hosts\""
 			eval $hostsSite
