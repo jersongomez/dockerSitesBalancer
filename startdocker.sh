@@ -103,9 +103,13 @@ runEnviroments(){
 		else
 			RUTA_MDM="-v $RUTA_MDM:/var/www/html/mdmdecameron:rw"
 		fi
-
-                rutSecure="$RUTA_SECURE $RUTA_AMADEUS $RUTA_PNP $RUTA_MDM"		
-    	fi
+		if [ ! -d $RUTA_LANDING_MULTI ] || [ -z $RUTA_LANDING_MULTI ] ; then
+			printWarning " \- RUTA_LANDING_MULTI ($RUTA_LANDING_MULTI) $msg"
+		else
+			RUTA_LANDING_MULTI="-v $RUTA_LANDING_MULTI:/var/www/html/viajero-del-mundo:rw"
+		fi
+        rutSecure="$RUTA_SECURE $RUTA_AMADEUS $RUTA_PNP $RUTA_MDM $RUTA_LANDING_MULTI"
+	fi
 	
 	if [ ! -z $ENVHODELINE ] && $ENVHODELINE; then                
 		if [ ! -d $RUTA_HODELINE ] ; then
