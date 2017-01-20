@@ -94,4 +94,4 @@ Para correr el script en windows es necesario intalar las siguientes herramienta
 2. Docker Toolbox (https://docs.docker.com/toolbox/toolbox_install_windows/)
 Permite la interacción con los contenedores docker desde windows. Desde esta consola tendremos la posibilidad de incresar y ejecutar el script start
 
-![alt tag](blob/master/assets/DockerSiteBalancerExec.PNG?raw=true)
+![Alt text](assets/DockerSiteBalancerExec.PNG?raw=true "Projecto Docker Site Balancer")
