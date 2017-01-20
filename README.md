@@ -83,15 +83,37 @@ $ docker inspect --format='{{.Name}} {{range .NetworkSettings.Networks}}{{.IPAdd
 ## Usuarios Windows (Windows Issue).
 
 Para correr el script en windows es necesario intalar las siguientes herramientas:
-1. Cygwing (https://cygwin.com/install.html). Es un emulador de consola que permite la instalación de algunos paquetes linux. Al instalar Cygwin existe la opción de instalar paquetes, entre los cuales buscaremos e instalaremos los siguientes:
+1. Cygwing (https://cygwin.com/install.html). Es un emulador de consola que permite la instalación de algunos paquetes linux. Al instalar Cygwin existe la opción de instalar paquetes.
+
+#### Proceso de instalación Cygwin
+
+    1.1. Al dar click en la instalación de cygwing, aparecerá la siguiente ventana, en la cual se debe aceptar la excepción de seguridad.
+    ![Alt text](assets/DockerSiteBalancerCywingInstalation.PNG?raw=true "Projecto Docker Site Balancer")
+
+    1.2. Dar clic en siguiente en la ventana de bienvenida.
+![Alt text](assets/DockerSiteBalancerCywingInstalation2.PNG?raw=true "Projecto Docker Site Balancer")
+
+    1.3. Seleccionar la instalación desde internet
+![Alt text](assets/DockerSiteBalancerCywingInstalation3.PNG?raw=true "Projecto Docker Site Balancer")
+    
+    1.4. Seleccionar cualquier repositorio desde donde se instalarán los paquetes.
+![Alt text](assets/DockerSiteBalancerCywingInstalation4.PNG?raw=true "Projecto Docker Site Balancer")
+    
+    1.5. Aparecerá una ventana que permite la búsqueda de los paquetes que se desea instalar en el entorno. Buscaremos e instalaremos los siguientes:
 * vim
-* nano
+* nano 
 * curl
 * wget
 * git
-* jq	
+* jq
+
+![Alt text](assets/DockerSiteBalancerCywingInstalation5.PNG?raw=true "Projecto Docker Site Balancer")
 
 2. Docker Toolbox (https://docs.docker.com/toolbox/toolbox_install_windows/)
-Permite la interacción con los contenedores docker desde windows. Desde esta consola tendremos la posibilidad de incresar y ejecutar el script start
+Permite la interacción con los contenedores docker desde windows. Desde esta consola tendremos la posibilidad de incresar y ejecutar el script start.
 
-![Alt text](assets/DockerSiteBalancerExec.PNG?raw=true "Projecto Docker Site Balancer")
+    2.1. Nos ubicamos en la carpeta del proyecto, como se muestra en el siguiente ejemplo.
+    ![Alt text](assets/DockerSiteBalancerExec.PNG?raw=true "Projecto Docker Site Balancer")
+    
+    2.2. Al ejecutar el script nos mostrara un tecto de ayuda que indica cuales son los parametros que recibe. `-r: run, -i: install`
+        ![Alt text](assets/DockerSiteBalancerExec2.PNG?raw=true "Ejecucion del script")
