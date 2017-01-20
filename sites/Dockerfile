@@ -54,24 +54,24 @@ RUN 	chmod 775 /var/ \
 	
 
 # ADICION DE LLAVE PUBLIC Y PRIVATE Y CERTIFICADOS
-ADD 	./scripts/securep.decameron.com.crt /etc/httpd/ssl/securep.decameron.com.crt
-ADD 	./scripts/securep.decameron.com.key /etc/httpd/ssl/securep.decameron.com.key
-ADD 	./scripts/certificate.crt /etc/pki/tls/certs/certificate.crt
-ADD 	./scripts/certificate.csr /etc/pki/tls/private/certificate.csr
-ADD 	./scripts/certificate.key /etc/pki/tls/private/certificate.key
+ADD 	./sites/scripts/securep.decameron.com.crt /etc/httpd/ssl/securep.decameron.com.crt
+ADD 	./sites/scripts/securep.decameron.com.key /etc/httpd/ssl/securep.decameron.com.key
+ADD 	./sites/scripts/certificate.crt /etc/pki/tls/certs/certificate.crt
+ADD 	./sites/scripts/certificate.csr /etc/pki/tls/private/certificate.csr
+ADD 	./sites/scripts/certificate.key /etc/pki/tls/private/certificate.key
 
 # ARCHIVOS PARA BALANCEAR WEB-APP
-ADD 	./scripts/createBalancer.php /scripts/createBalancer.php
-ADD	./configuration/balancer.conf /scripts/balancer.conf
+ADD 	./sites/scripts/createBalancer.php /scripts/createBalancer.php
+ADD	./sites/configuration/balancer.conf /scripts/balancer.conf
 ENV	PATH=/opt/rh/php54/root/usr/bin:/opt/rh/php54/root/usr/sbin${PATH:+:${PATH}}
 ENV	MANPATH=/opt/rh/php54/root/usr/share/man:${MANPATH}
 RUN 	php /scripts/createBalancer.php
 
 # INCORPORAR ARCHIVOS VHOSTS
-ADD 	./configuration/httpd-vhosts-sites.conf /etc/httpd/conf/httpd-vhosts-sites.conf 
-ADD	./configuration/httpd-vhosts-secure.conf /etc/httpd/conf/httpd-vhosts-secure.conf 
-ADD	./configuration/httpd-vhosts-hw.conf /etc/httpd/conf/httpd-vhosts-hw.conf 
-ADD	./configuration/httpd-vhosts-webapps.conf /etc/httpd/conf/httpd-vhosts-webapps.conf 
+ADD 	./sites/configuration/httpd-vhosts-sites.conf /etc/httpd/conf/httpd-vhosts-sites.conf 
+ADD	./sites/configuration/httpd-vhosts-secure.conf /etc/httpd/conf/httpd-vhosts-secure.conf 
+ADD	./sites/configuration/httpd-vhosts-hw.conf /etc/httpd/conf/httpd-vhosts-hw.conf 
+ADD	./sites/configuration/httpd-vhosts-webapps.conf /etc/httpd/conf/httpd-vhosts-webapps.conf 
 
 # INSTALACION DE IDIOMAS EN SO
 RUN	localedef -c -i en_GB -f UTF-8 en_GB.UTF-8 
