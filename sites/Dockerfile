@@ -9,6 +9,7 @@ RUN 	echo "Include conf/httpd-vhost*.conf" >> /etc/httpd/conf/httpd.conf
 RUN 	yum install -y centos-release-SCL 
 RUN	yum clean all
 RUN	yum install -y php54-php-bcmath php54 php54-php-cli php54-php-gd php54-php-ldap php54-php-mbstring php54-php-xmlrpc php54-php php54-php-pdo php54-php-pear php54-php-pecl-apc php54-php-mysqlnd php54-php-process php54-php-pgsql php54-php-soap
+RUN	yum install -y mysql
 RUN	source /opt/rh/php54/enable
 RUN	rm -fr /etc/httpd/conf.d/php.conf 
 RUN	sed -i -- 's/\;date\.timezone\ =/date\.timezone\ = America\/Bogota/g' /opt/rh/php54/root/etc/php.ini
