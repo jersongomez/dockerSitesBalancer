@@ -3,7 +3,7 @@
 parse(){
 	msg="- $1 \n - Numero de argumentos invalido"
 	msg="$msg \n\n dockerStart [options]"
-	msg="$msg \n   -r: run or -i: install"
+	msg="$msg \n   -r: run, -i: install, -s: stop"
 	msg="\n $msg \n"
 	printError "$msg"
 }
@@ -33,14 +33,19 @@ printFinalHelp(){
 	if [ $PLATFORM = "linux" ]; then
 		hostConfig="docker inspect --format='{{.Name}}  {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $i $containerName"
 	else
+		hostName="docker inspect --format='{{.Name}}' $i $containerPersistance"
+		ipAccess="&&docker-machine ip default"
+		hostConfig="$hostName $ipAccess"
 		hostName="docker inspect --format='{{.Name}}' $i $containerName"
-		hostConfig="$hostName && docker-machine ip default"
+		hostConfig="$hostConfig&&$hostName $ipAccess"
 	fi
 	
 	echo "\n Sus servidores se crearon con la siguiente configuracion"
 	eval $hostConfig
 
 	echo "\nPara ingresar a sus servidores ejecute los siguientes comandos:"
+	command="docker inspect --format='{{.Name}}:$ docker exec -it {{.Config.Hostname}} bash' $i $containerPersistance"
+	eval $command
 	command="docker inspect --format='{{.Name}}:$ docker exec -it {{.Config.Hostname}} bash' $i $containerName"
 	eval $command
 	echo "\nLos servidores site y secure cuentan con certificaciones SSL (opcional)\nruta certificados:\n"
@@ -67,17 +72,33 @@ installEnviroments(){
 	# Reiniciamos el servicio docker
 	#sudo service docker restart
 
-	echo "\nInstalando entornos ..."	
+	shopt -s xpg_echo
+	echo "\nInstalando entornos ...\n"
+	printf "${BLUE}"
+	echo "\n \- Creando entorno persistence\n"
+	printf "${NC}"
+	docker build -t jgomez17/centos-php54-persistence -f persistence/Dockerfile .
+	printf "${BLUE}"
+	echo "\n \- Creando entorno sites\n"
+	printf "${NC}"
 	docker build -t jgomez17/centos-php54-apache -f sites/Dockerfile .
 
 }
 
+# Para el contenedor por nombre
 stopContainerByName(){
 	# Detiene contenedores del site existentes
-	echo " \-Parando contenedor ($1)"
+	echo "\n \-Stopping container ($1)"
 	docker stop $(docker inspect --format='{{.Id}}' $i $1)
-	echo " \-Eliminando contenedor ($1)"
+	echo " \-Deleting container ($1)"
 	docker rm $(docker inspect --format='{{.Id}}' $i $1)
+}
+
+# Para los contenedores que esten corriendo
+stopEnviroments(){
+	echo "\n \-Stopping all containers ..."
+	docker stop $(docker ps -aq)&&docker rm $(docker ps -aq)
+	echo " [finish]\n"
 }
 
 # Arranca entornos indicados
@@ -87,12 +108,37 @@ runEnviroments(){
 
 	msg="no es un directorio valido! Verifique las rutas en su archivo de configuracion [exit]"
 	msgFile="no es un archivo valido! Verifique las rutas en su archivo de configuracion [exit]"
-	containerName="sites"
 
-	# Detiene contenedores del site existentes
+	# Arrancando contenedor persistence
+	containerPersistance="persistence"
+	stopContainerByName $containerPersistance
+	runPersistence $containerPersistance
+
+	# Arrancando contenedor sites
+	containerName="sites"
 	stopContainerByName $containerName
+	runSites $containerName $containerPersistance
+}
+
+
+# Inicia contenedor de persistencia
+runPersistence(){
+
+	containerName=$1
+	RUTA_DB="-v $RUTA_DB:/var/www/:rw"
+	echo " \-Running container ($containerName)..."
+	command="docker run -dt --name $containerName -p 3306:3306 -p 5432:5432 jgomez17/centos-php54-persistence"
+	eval $command
+}
+
+# Inicia contenedor de todos los sitios
+runSites(){
+
+	containerName=$1
+	containerPersistance=$2
+	echo " \-Running container($containerName)..."
 	RUTA_WWW="-v $RUTA_WWW:/var/www/:rw"
-	command="docker run -dt --name $containerName $RUTA_WWW -p 80:80 -p 443:443 jgomez17/centos-php54-apache"
+	command="docker run -dt --name $containerName --link $containerPersistance $RUTA_WWW -p 80:80 -p 443:443 jgomez17/centos-php54-apache"
 	eval $command
 
 	# Se generan Hosts en los container
@@ -145,7 +191,6 @@ runEnviroments(){
 	done
 }
 
-
 if test "$(($#))" -le 0 ; then
 	parse
 fi
@@ -158,6 +203,9 @@ case $param in
 	;;
 	-r)
 		RUN=true
+	;;
+	-s)
+		STOP=true
 	;;
 	*)
 	;;
@@ -236,7 +284,7 @@ do
 done < $pathConfiguration
 
 # Validando opciones enviadas por consola
-if [ ! -z $INSTALL ] || [ ! -z $RUN ] ; then
+if [ ! -z $INSTALL ] || [ ! -z $RUN ] || [ ! -z $STOP ]; then
 	if [ ! -z $INSTALL ] && $INSTALL ; then
 		installEnviroments
 	fi
@@ -244,6 +292,10 @@ if [ ! -z $INSTALL ] || [ ! -z $RUN ] ; then
 	if [ ! -z $RUN ] && $RUN ; then
 		runEnviroments
 		printFinalHelp
+	fi
+
+	if [ ! -z $STOP ] && $STOP ; then
+		stopEnviroments
 	fi
 fi
 
