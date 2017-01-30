@@ -14,6 +14,9 @@ detectPlatform(){
 	if ! uname | grep -i linux; then
 		PLATFORM="windows"
 	fi
+	if uname | grep -i NT-10; then
+		PLATFORM="win10"
+	fi
 }
 
 printError(){
@@ -33,19 +36,27 @@ printFinalHelp(){
 	if [ $PLATFORM = "linux" ]; then
 		hostConfig="docker inspect --format='{{.Name}}  {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $i $containerName"
 	else
-		hostName="docker inspect --format='{{.Name}}' $i $containerPersistance"
-		ipAccess="&&docker-machine ip default"
-		hostConfig="$hostName $ipAccess"
-		hostName="docker inspect --format='{{.Name}}' $i $containerName"
-		hostConfig="$hostConfig&&$hostName $ipAccess"
+		if [ $PLATFORM = "win10" ]; then
+			hostName="docker inspect --format='{{.Name}}' $i $containerName"
+			ipAccess="&& echo '127.0.0.1'"
+		else
+			ipAccess="&&docker-machine ip default"
+			hostName="docker inspect --format='{{.Name}}' $i $containerName"
+			hostConfig="$hostName $ipAccess"
+		fi
 	fi
 	
 	echo "\n Sus servidores se crearon con la siguiente configuracion"
 	eval $hostConfig
 
+	if [ $PLATFORM = "win10" ]; then
+		echo "\n Ejecutar los siguientes comandos antes de ingresar al container en un terminal CMD \n$EXECUTE_WIN"		
+	fi
+
+
 	echo "\nPara ingresar a sus servidores ejecute los siguientes comandos:"
-	command="docker inspect --format='{{.Name}}:$ docker exec -it {{.Config.Hostname}} bash' $i $containerPersistance"
-	eval $command
+	#command="docker inspect --format='{{.Name}}:$ docker exec -it {{.Config.Hostname}} bash' $i $containerPersistance"
+	#eval $command
 	command="docker inspect --format='{{.Name}}:$ docker exec -it {{.Config.Hostname}} bash' $i $containerName"
 	eval $command
 	echo "\nLos servidores site y secure cuentan con certificaciones SSL (opcional)\nruta certificados:\n"
@@ -75,10 +86,10 @@ installEnviroments(){
 	shopt -s xpg_echo
 	echo "\nInstalando entornos ...\n"
 	printf "${BLUE}"
-	echo "\n \- Creando entorno persistence\n"
-	printf "${NC}"
-	docker build -t jgomez17/centos-php54-persistence -f persistence/Dockerfile .
-	printf "${BLUE}"
+	#echo "\n \- Creando entorno persistence\n"
+	#printf "${NC}"
+	#docker build -t jgomez17/centos-php54-persistence -f persistence/Dockerfile .
+	#printf "${BLUE}"
 	echo "\n \- Creando entorno sites\n"
 	printf "${NC}"
 	docker build -t jgomez17/centos-php54-apache -f sites/Dockerfile .
@@ -110,14 +121,15 @@ runEnviroments(){
 	msgFile="no es un archivo valido! Verifique las rutas en su archivo de configuracion [exit]"
 
 	# Arrancando contenedor persistence
-	containerPersistance="persistence"
-	stopContainerByName $containerPersistance
-	runPersistence $containerPersistance
+	#containerPersistance="persistence"
+	#stopContainerByName $containerPersistance
+	#runPersistence $containerPersistance
 
 	# Arrancando contenedor sites
 	containerName="sites"
 	stopContainerByName $containerName
-	runSites $containerName $containerPersistance
+	runSites $containerName 
+	#$containerPersistance
 }
 
 
@@ -125,7 +137,7 @@ runEnviroments(){
 runPersistence(){
 
 	containerName=$1
-	RUTA_DB="-v $RUTA_DB:/var/www/:rw"
+	RUTA_DB='-v "$RUTA_DB":/var/www/:rw'
 	echo " \-Running container ($containerName)..."
 	command="docker run -dt --name $containerName -p 3306:3306 -p 5432:5432 jgomez17/centos-php54-persistence"
 	eval $command
@@ -135,10 +147,10 @@ runPersistence(){
 runSites(){
 
 	containerName=$1
-	containerPersistance=$2
+	#containerPersistance=$2
 	echo " \-Running container($containerName)..."
-	RUTA_WWW="-v $RUTA_WWW:/var/www/:rw"
-	command="docker run -dt --name $containerName --link $containerPersistance $RUTA_WWW -p 80:80 -p 443:443 jgomez17/centos-php54-apache"
+	RUTA_WWW="-v \"$RUTA_WWW\":/var/www/:rw"	
+	command="docker run -dt --name $containerName $RUTA_WWW -p 80:80 -p 443:443 jgomez17/centos-php54-apache"
 	eval $command
 
 	# Se generan Hosts en los container
@@ -147,17 +159,23 @@ runSites(){
 		ipcontainerSite=$(eval $command)
 		jq="jq"
 	else
-		ipcontainerSite=$(docker-machine ip default)
-		jq="/c/cygwin/bin/jq.exe"
+		if [ $PLATFORM = "win10" ]; then
+			ipcontainerSite=$(echo '127.0.0.1')	
+			jq="/c/cygwin/bin/jq.exe"
+		else
+			ipcontainerSite=$(docker-machine ip default)
+			jq="/c/cygwin/bin/jq.exe"
+		fi
 	fi
 
 	containerId=$(docker inspect --format='{{.Id}}' $i $containerName)
-	service="docker exec -it $containerId /bin/bash -c 'service httpd start'"
+	service="docker exec -it $containerId /bin/bash service httpd start"
 	eval $service
 
 	# configuramos virtual hosts en los contenedores como en el host principal
 	cantBalancer=$(cat $pathBalancer | $jq '. | length')
 	COUNTER=0
+	EXECUTE_WIN=""
     while [ $COUNTER -lt $cantBalancer ]; do
 		principal=$(cat $pathBalancer | $jq ".[$COUNTER] .principal" | sed 's/"//g')
 		hostPath="/etc/hosts"
@@ -167,6 +185,10 @@ runSites(){
 			hostPath="/c/Windows/System32/drivers/etc/hosts"
 		fi
 		
+		if [ $PLATFORM = "win10" ];then
+			hostPath="/c/Windows/System32/drivers/etc/hosts"
+		fi
+
 	 	if ! grep -q "\s${principal}$" $hostPath ; then 
 			sh -c "echo '$ipcontainerSite	$principal' >> $hostPath"
 		else
@@ -177,6 +199,7 @@ runSites(){
 
 		hostsSite="docker exec -it $containerId bash -c \"echo '$ipcontainerSite	$principal' >> /etc/hosts\""
 		eval $hostsSite
+		EXECUTE_WIN="$EXECUTE_WIN && $hostsSite"
 
 		#agregamos los hosts de los nodos
 		cantNodes=$(cat $pathBalancer | $jq ".[$COUNTER] .sites | length")
@@ -184,8 +207,9 @@ runSites(){
 		while [ $COUNTERNODE -lt $cantNodes ] ; do
 			let COUNTERNODE=COUNTERNODE+1
 			node=$(cat $pathBalancer | $jq ".[$COUNTER] .sites .nodo$COUNTERNODE" | sed 's/"//g')
-			hostsSite="docker exec -it $containerId bash -c \"echo '$ipcontainerSite	$node' >> $hostPathBk\""
+			hostsSite="docker exec -it $containerId bash -c \"echo '$ipcontainerSite	$node' >> /etc/hosts\""
 			eval $hostsSite
+			EXECUTE_WIN="$EXECUTE_WIN && $hostsSite"
 		done
 		let COUNTER=COUNTER+1 
 	done
