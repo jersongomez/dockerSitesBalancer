@@ -86,10 +86,10 @@ installEnviroments(){
 	shopt -s xpg_echo
 	echo "\nInstalando entornos ...\n"
 	printf "${BLUE}"
-	#echo "\n \- Creando entorno persistence\n"
-	#printf "${NC}"
-	#docker build -t jgomez17/centos-php54-persistence -f persistence/Dockerfile .
-	#printf "${BLUE}"
+	echo "\n \- Creando entorno persistence\n"
+	printf "${NC}"
+	docker build -t  mysql/mysql-server:5.7 -f persistence/Dockerfile .
+	printf "${BLUE}"
 	echo "\n \- Creando entorno sites\n"
 	printf "${NC}"
 	docker build -t jgomez17/centos-php54-apache -f sites/Dockerfile .
@@ -139,7 +139,7 @@ runPersistence(){
 	containerName=$1
 	RUTA_DB='-v "$RUTA_DB":/var/www/:rw'
 	echo " \-Running container ($containerName)..."
-	command="docker run -dt --name $containerName -p 3306:3306 -p 5432:5432 jgomez17/centos-php54-persistence"
+	command="docker run --name persistence -e MYSQL_RANDOM_ROOT_PASSWORD=yes -v C:/var/mysql:/var/lib/mysql/ -v C:/var/dumps:/dumps/ -v C:/var/scripts:/docker-entrypoint-initdb.d/ -p 3306:3306 -d mysql/mysql-server:5.7"
 	eval $command
 }
 
