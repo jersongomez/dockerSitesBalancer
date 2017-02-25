@@ -68,7 +68,8 @@ ENV	MANPATH=/opt/rh/php54/root/usr/share/man:${MANPATH}
 RUN 	php /scripts/createBalancer.php
 
 # INCORPORAR ARCHIVOS VHOSTS
-ADD 	./sites/configuration/httpd-vhosts-sites.conf /etc/httpd/conf/httpd-vhosts-sites.conf 
+ADD ./sites/configuration/httpd.conf /etc/httpd/conf/httpd.conf 
+ADD ./sites/configuration/httpd-vhosts-sites.conf /etc/httpd/conf/httpd-vhosts-sites.conf 
 ADD	./sites/configuration/httpd-vhosts-secure.conf /etc/httpd/conf/httpd-vhosts-secure.conf 
 ADD	./sites/configuration/httpd-vhosts-hw.conf /etc/httpd/conf/httpd-vhosts-hw.conf 
 ADD	./sites/configuration/httpd-vhosts-webapps.conf /etc/httpd/conf/httpd-vhosts-webapps.conf 
