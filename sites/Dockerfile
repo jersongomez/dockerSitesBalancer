@@ -3,7 +3,6 @@ FROM 	centos:6.6
 # INSTALACION APACHE
 RUN 	yum install -y httpd 
 RUN 	yum install -y mod_ssl
-RUN 	echo "Include conf/httpd-vhost*.conf" >> /etc/httpd/conf/httpd.conf
 
 # INSTALACION PHP 5.4
 RUN 	yum install -y centos-release-SCL 
@@ -61,18 +60,19 @@ ADD 	./sites/scripts/certificate.csr /etc/pki/tls/private/certificate.csr
 ADD 	./sites/scripts/certificate.key /etc/pki/tls/private/certificate.key
 
 # ARCHIVOS PARA BALANCEAR WEB-APP
-ADD 	./sites/scripts/createBalancer.php /scripts/createBalancer.php
+ADD ./sites/scripts/createBalancer.php /scripts/createBalancer.php
 ADD	./sites/configuration/balancer.conf /scripts/balancer.conf
 ENV	PATH=/opt/rh/php54/root/usr/bin:/opt/rh/php54/root/usr/sbin${PATH:+:${PATH}}
 ENV	MANPATH=/opt/rh/php54/root/usr/share/man:${MANPATH}
-RUN 	php /scripts/createBalancer.php
+RUN php /scripts/createBalancer.php
 
 # INCORPORAR ARCHIVOS VHOSTS
-ADD ./sites/configuration/httpd.conf /etc/httpd/conf/httpd.conf 
-ADD ./sites/configuration/httpd-vhosts-sites.conf /etc/httpd/conf/httpd-vhosts-sites.conf 
-ADD	./sites/configuration/httpd-vhosts-secure.conf /etc/httpd/conf/httpd-vhosts-secure.conf 
-ADD	./sites/configuration/httpd-vhosts-hw.conf /etc/httpd/conf/httpd-vhosts-hw.conf 
-ADD	./sites/configuration/httpd-vhosts-webapps.conf /etc/httpd/conf/httpd-vhosts-webapps.conf 
+ADD ./sites/configuration/httpd-default.conf /scripts/
+ADD ./sites/configuration/httpd-vhosts-*.conf /etc/httpd/conf/
+
+RUN 	cat /scripts/httpd-default.conf >> /etc/httpd/conf/httpd.conf
+RUN 	echo "" >> /etc/httpd/conf/httpd.conf
+RUN 	echo "Include conf/httpd-vhost*.conf" >> /etc/httpd/conf/httpd.conf
 
 # INSTALACION DE IDIOMAS EN SO
 RUN	localedef -c -i en_GB -f UTF-8 en_GB.UTF-8 
