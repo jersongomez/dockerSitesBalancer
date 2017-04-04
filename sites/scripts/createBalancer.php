@@ -14,19 +14,22 @@ class Balancer
     function buildFile($principal, $nodos, $port, $numBalancer){
 	$i = 1;
 	$urlsReverse = "";
-        $urlsBalance = "";
+    $urlsBalance = "";
 	$complementoSSl = "";
-	foreach ($nodos as $site) {
-            $urlsReverse .= "ProxyPassReverse / http://{$site}/\n";
-            $urlsBalance .= "BalancerMember http://{$site} route=node{$i}\n";
-            $i++;
-        }
-
+	$complementoURL = "";
 	if($port != 80){
-	$complementoSSl = "SSLEngine on
-			    SSLCertificateFile /etc/pki/tls/certs/certificate.crt
-			    SSLCertificateKeyFile /etc/pki/tls/private/certificate.key";
+		$complementoURL = "s";
+		$complementoSSl = "SSLProxyEngine on
+			SSLEngine on
+		    SSLCertificateFile /etc/pki/tls/certs/certificate.crt
+		    SSLCertificateKeyFile /etc/pki/tls/private/certificate.key";
 	}
+
+	foreach ($nodos as $site) {
+        $urlsReverse .= "ProxyPassReverse / http{$complementoURL}://{$site}/\n";
+        $urlsBalance .= "BalancerMember http{$complementoURL}://{$site} route=node{$i}\n";
+        $i++;
+    }	
 
         $vHost = "echo '<VirtualHost *:$port>
 
