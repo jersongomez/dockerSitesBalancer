@@ -17,6 +17,9 @@ detectPlatform(){
 	if uname | grep -i NT-10; then
 		PLATFORM="win10"
 	fi
+	if uname | grep -i Darwin; then
+		PLATFORM="mac"
+	fi
 }
 
 printError(){
@@ -37,6 +40,9 @@ printFinalHelp(){
 		hostConfig="docker inspect --format='{{.Name}}  {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $i $containerName"
 	else
 		if [ $PLATFORM = "win10" ]; then
+			hostName="docker inspect --format='{{.Name}}' $i $containerName"
+			ipAccess="&& echo '127.0.0.1'"
+		elif [ $PLATFORM = "mac" ]; then
 			hostName="docker inspect --format='{{.Name}}' $i $containerName"
 			ipAccess="&& echo '127.0.0.1'"
 		else
@@ -159,7 +165,10 @@ runSites(){
 		ipcontainerSite=$(eval $command)
 		jq="jq"
 	else
-		if [ $PLATFORM = "win10" ]; then
+		if [ $PLATFORM = "mac" ]; then
+			ipcontainerSite=$(echo '127.0.0.1')	
+			jq="jq"
+		elif [ $PLATFORM = "win10" ]; then
 			ipcontainerSite=$(echo '127.0.0.1')	
 			jq="/c/cygwin/bin/jq.exe"
 		else
