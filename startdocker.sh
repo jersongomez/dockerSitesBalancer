@@ -213,6 +213,7 @@ runSites(){
 		done
 		let COUNTER=COUNTER+1 
 	done
+        EXECUTE_WIN="$EXECUTE_WIN && docker exec -it $containerId bash -c \"service httpd start\""
 }
 
 if test "$(($#))" -le 0 ; then
