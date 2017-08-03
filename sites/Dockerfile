@@ -44,7 +44,7 @@ RUN 	chmod 775 /var/ \
 	 /var/www/files/web/file \
 	 /var/www/files/webhw/ \ 
 	 /var/www/files/webhw/file \
-	 /var/log/ \ 	
+	 /var/log/ \
 	 /var/log/httpd/ \
 	 /var/log/httpd/logAplicacion/ \
 	 /tmp-www/ \ 
@@ -55,6 +55,8 @@ RUN 	chmod 775 /var/ \
 # ADICION DE LLAVE PUBLIC Y PRIVATE Y CERTIFICADOS
 ADD 	./sites/scripts/securep.decameron.com.crt /etc/httpd/ssl/securep.decameron.com.crt
 ADD 	./sites/scripts/securep.decameron.com.key /etc/httpd/ssl/securep.decameron.com.key
+ADD 	./sites/scripts/securep.decameron.comInternas.crt /etc/httpd/ssl/securep.decameron.comInternas.crt
+ADD 	./sites/scripts/securep.decameron.comInternas.key /etc/httpd/ssl/securep.decameron.comInternas.key
 ADD 	./sites/scripts/certificate.crt /etc/pki/tls/certs/certificate.crt
 ADD 	./sites/scripts/certificate.csr /etc/pki/tls/private/certificate.csr
 ADD 	./sites/scripts/certificate.key /etc/pki/tls/private/certificate.key
