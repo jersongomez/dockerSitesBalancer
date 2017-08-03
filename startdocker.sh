@@ -206,7 +206,7 @@ runSites(){
 			sh -c "cat $hostPathBk | sed 's/.*\t$principal/$ipcontainerSite\t$principal/g' > $hostPath"
 		fi
 
-		hostsSite="docker exec -it $containerId bash -c \"echo '$ipcontainerSite	$principal' >> /etc/hosts\""
+		hostsSite="docker exec -it $containerName bash -c \"echo '$ipcontainerSite	$principal' >> /etc/hosts\""
 		eval $hostsSite
 		EXECUTE_WIN="$EXECUTE_WIN && $hostsSite"
 
@@ -216,7 +216,7 @@ runSites(){
 		while [ $COUNTERNODE -lt $cantNodes ] ; do
 			let COUNTERNODE=COUNTERNODE+1
 			node=$(cat $pathBalancer | $jq ".[$COUNTER] .sites .nodo$COUNTERNODE" | sed 's/"//g')
-			hostsSite="docker exec -it $containerId bash -c \"echo '$ipcontainerSite	$node' >> /etc/hosts\""
+			hostsSite="docker exec -it $containerName bash -c \"echo '$ipcontainerSite	$node' >> /etc/hosts\""
 			eval $hostsSite
 			EXECUTE_WIN="$EXECUTE_WIN && $hostsSite"
 		done
